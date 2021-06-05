@@ -2,21 +2,23 @@ import React from "react"
 import browserLang from "browser-lang"
 import { navigate } from "gatsby"
 import { IntlProvider } from "react-intl"
+import { shouldPolyfill as shouldPolyfillPluralRules } from "@formatjs/intl-pluralrules/should-polyfill"
+import { shouldPolyfill as shouldPolyfillTimeFormat } from '@formatjs/intl-relativetimeformat/should-polyfill'
 import { IntlContextProvider } from "./intl-context"
 import { isMatch } from "./util"
 const preferDefault = m => (m && m.default) || m
 
-const polyfillIntl = language => {
+const polyfillIntl = async language => {
   const locale = language.split("-")[0]
   try {
-    if (!Intl.PluralRules) {
-      require("@formatjs/intl-pluralrules/polyfill")
-      require(`@formatjs/intl-pluralrules/locale-data/${locale}`)
+    if (shouldPolyfillPluralRules()) {
+      await import('@formatjs/intl-pluralrules/polyfill')
+      await import(`@formatjs/intl-pluralrules/locale-data/${locale}`)
     }
 
-    if (!Intl.RelativeTimeFormat) {
-      require("@formatjs/intl-relativetimeformat/polyfill")
-      require(`@formatjs/intl-relativetimeformat/locale-data/${locale}`)
+    if (shouldPolyfillTimeFormat()) {
+      await import('@formatjs/intl-relativetimeformat/polyfill')
+      await import(`@formatjs/intl-relativetimeformat/locale-data/${locale}`)
     }
   } catch (e) {
     throw new Error(`Cannot find react-intl/locale-data/${language}`)
